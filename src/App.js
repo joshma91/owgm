@@ -5,6 +5,8 @@ import Particles from "react-particles-js";
 import particlesConfig from "./json/particlesConfig.json";
 import Layout from "./components/Layout";
 import TabPane from "./components/TabPane";
+import FirmStats from "./components/FirmStats";
+import LawyerStats from "./components/LawyerStats";
 import "./App.css";
 import Allowed from "./json/Allowed.json";
 import NonPCT from "./json/NonPCT.json";
@@ -20,14 +22,16 @@ class App extends Component {
   };
 
   componentDidMount = async () => {
-    this.getLawyers();
+    await this.getLawyers();
     this.getGrantedApplications();
     this.getGrantedByYear();
     this.getAppliedByYear();
+    await this.getLawyerGrantsByYear();
   };
 
-  getLawyers = () => {
+  getLawyers = async () => {
     const lawyers = [...new Set(OfficeAction.map(item => item.Attorney))];
+    console.log(lawyers);
     this.setState({ lawyers });
   };
 
@@ -46,7 +50,6 @@ class App extends Component {
       const num = grantedByYearObj[year];
       return { year, num };
     });
-    console.log(grantedByYear);
 
     this.setState({ grantedByYear });
   };
@@ -62,6 +65,22 @@ class App extends Component {
     });
 
     this.setState({ appliedByYear });
+  };
+
+  getLawyerGrantsByYear = async () => {
+    const { lawyers } = this.state;
+    const update = lawyers.map(lwr => {
+      const grantedFilter = Allowed.filter(x => x.Status == "Granted");
+      const lawyerGrantByYear = this.totalByYear(
+        grantedFilter.filter(x => x.Attorney == lwr),
+        "DueDate"
+      );
+
+      return { [lwr]: lawyerGrantByYear };
+    });
+
+    console.log(update);
+    this.setState({ lawyers: update });
   };
 
   totalByYear = (data, dateField) => {
@@ -88,64 +107,20 @@ class App extends Component {
         menuItem: "Firm Statistics",
         render: () => (
           <TabPane>
-            <Grid columns={2} divided>
-              <Grid.Row>
-                <Grid.Column>
-                  <p style={{ float: "left", fontSize: "large" }}>
-                    Number of Granted PPH Applications
-                  </p>
-                  <BarChart
-                    width={400}
-                    height={300}
-                    data={grantedByYear}
-                    margin={{ top: 50, right: 10, left: 10, bottom: 5 }}
-                  >
-                    <XAxis dataKey="year" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar
-                      type="monotone"
-                      dataKey="num"
-                      barSize={30}
-                      fill="#8884d8"
-                    />
-                  </BarChart>
-                </Grid.Column>
-                <Grid.Column>
-                  <p style={{ float: "left", fontSize: "large" }}>
-                    Number of PPH Applications
-                  </p>
-                  <BarChart
-                    width={400}
-                    height={300}
-                    data={appliedByYear}
-                    margin={{ top: 50, right: 10, left: 10, bottom: 5 }}
-                  >
-                    <XAxis dataKey="year" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar
-                      type="monotone"
-                      dataKey="numPCT"
-                      barSize={30}
-                      fill="#8884d8"
-                    />
-                    <Bar
-                      type="monotone"
-                      dataKey="numNonPCT"
-                      barSize={30}
-                      fill="#82ca9d"
-                    />
-                  </BarChart>
-                </Grid.Column>
-              </Grid.Row>
-            </Grid>
+            <FirmStats
+              grantedByYear={grantedByYear}
+              appliedByYear={appliedByYear}
+            />
           </TabPane>
         )
       },
       {
         menuItem: "Lawyer Statistics",
-        render: () => <TabPane>Tab 2 Content</TabPane>
+        render: () => (
+          <TabPane>
+            <LawyerStats lawyers={lawyers}/>
+          </TabPane>
+        )
       }
     ];
 
