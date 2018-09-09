@@ -45,7 +45,6 @@ class App extends Component {
     const grantedFilter = Allowed.filter(x => x.Status == "Granted");
     const grantedByYearObj = this.totalByYear(grantedFilter, "DueDate");
 
-    console.log(grantedByYearObj);
     const grantedByYear = Object.keys(grantedByYearObj).map(year => {
       const num = grantedByYearObj[year];
       return { year, num };
@@ -78,8 +77,6 @@ class App extends Component {
 
       return { [lwr]: lawyerGrantByYear };
     });
-
-    console.log(update);
     this.setState({ lawyers: update });
   };
 
@@ -100,26 +97,27 @@ class App extends Component {
 
   render() {
     const { lawyers, granted, grantedByYear, appliedByYear } = this.state;
+    console.log("grantedByYear", grantedByYear);
     const background =
       "https://patentable.com/wp-content/uploads/2016/10/ow_logo_header.png";
     const panes = [
       {
         menuItem: "Firm Statistics",
         render: () => (
-          <TabPane>
+          <Tab.Pane style={{ height: "400px" }}>
             <FirmStats
               grantedByYear={grantedByYear}
               appliedByYear={appliedByYear}
             />
-          </TabPane>
+          </Tab.Pane>
         )
       },
       {
         menuItem: "Lawyer Statistics",
         render: () => (
-          <TabPane>
-            <LawyerStats lawyers={lawyers}/>
-          </TabPane>
+          <Tab.Pane style={{ height: "400px" }}>
+            <LawyerStats lawyers={lawyers} />
+          </Tab.Pane>
         )
       }
     ];
