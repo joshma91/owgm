@@ -7,18 +7,22 @@ import Layout from "./components/Layout";
 import TabPane from "./components/TabPane";
 import FirmStats from "./components/FirmStats";
 import LawyerStats from "./components/LawyerStats";
+import OAStats from "./components/OAStats"
 import "./App.css";
 import Allowed from "./json/Allowed.json";
 import NonPCT from "./json/NonPCT.json";
 import PCT from "./json/PCT.json";
 import OfficeAction from "./json/OfficeAction.json";
+import Combined from "./json/Combined.json";
 
 class App extends Component {
   state = {
     lawyers: null,
     granted: null,
     grantedByYear: null,
-    appliedByYear: null
+    appliedByYear: null,
+    firstOfficeAction: null,
+    oaTimeByYear: null
   };
 
   componentDidMount = async () => {
@@ -27,6 +31,7 @@ class App extends Component {
     this.getGrantedByYear();
     this.getAppliedByYear();
     await this.getLawyerGrantsByYear();
+    await this.getFirstOfficeAction();
   };
 
   getLawyers = async () => {
@@ -80,6 +85,58 @@ class App extends Component {
     this.setState({ lawyers: update });
   };
 
+  getFirstOfficeAction = async () => {
+    const firstAction = OfficeAction.filter((x, i, self) => {
+      return (
+        self
+          .map(item => {
+            return item.CaseNumber;
+          })
+          .indexOf(x.CaseNumber) === i
+      );
+    });
+
+    // Filter only for GRANTED and PENDING statuses
+    const monthsBetween = firstAction.map(x => {
+      const filed = Combined.filter(y => {
+        return (
+          y.CaseNumber == x.CaseNumber &&
+          (y.Status == "Pending" || y.Status == "Granted")
+        );
+      });
+
+      if (filed.length >= 1) {
+        const oaDate = new Date(x.DueDate);
+        const filedDate = new Date(filed[0].FilDate);
+        oaDate.setMonth(oaDate.getMonth() - 6);
+        const timeDiff = Math.abs(oaDate.getTime() - filedDate.getTime());
+        const diffMonths = Math.ceil(timeDiff / (1000 * 3600 * 24 * 30));
+        const combined = filed[0];
+        combined.monthsToOA = diffMonths;
+        combined.yearFiled = filedDate.getFullYear()
+        return combined;
+      }
+    });
+
+    const monthsBetweenFiltered = monthsBetween.filter(x => x !== undefined);
+
+    const diffByYear = monthsBetweenFiltered.reduce((a, { yearFiled, monthsToOA}) => {
+      a[yearFiled] = a[yearFiled] || { sum: 0, count: 0}
+      a[yearFiled].sum += monthsToOA
+      a[yearFiled].average = a[yearFiled].sum / ++a[yearFiled].count
+      return a     
+    }, {})
+
+    console.log(diffByYear)
+    
+    const diffByYearClean = Object.keys(diffByYear).map(x => {
+      const diff = diffByYear[x]
+      return {year: x, months: diff.average}
+    })
+    console.log(diffByYearClean)
+    this.setState({oaTimeByYear: diffByYearClean})
+  };
+
   totalByYear = (data, dateField) => {
     const byYear = data.reduce((acc, curr) => {
       const date = new Date(curr[dateField]);
@@ -96,7 +153,7 @@ class App extends Component {
   };
 
   render() {
-    const { lawyers, granted, grantedByYear, appliedByYear } = this.state;
+    const { lawyers, granted, grantedByYear, appliedByYear, oaTimeByYear } = this.state;
     console.log("grantedByYear", grantedByYear);
     const background =
       "https://patentable.com/wp-content/uploads/2016/10/ow_logo_header.png";
@@ -119,6 +176,16 @@ class App extends Component {
             <LawyerStats lawyers={lawyers} />
           </Tab.Pane>
         )
+      },
+      {
+        menuItem: "Office Action Statistics",
+        render:() => (
+          <Tab.Pane style={{ height: "400px" }}>
+            <OAStats
+              oaTimeByYear={oaTimeByYear}
+            />
+          </Tab.Pane>
+        )
       }
     ];
 
@@ -137,6 +204,7 @@ class App extends Component {
           <Segment>
             <Header as="h2">Basic Stats</Header>
             <p>Number of Allowed PPH Applications: {granted}</p>
+            <p>Time between PPH request and first Office Action: </p>
           </Segment>
 
           <Tab panes={panes} />
