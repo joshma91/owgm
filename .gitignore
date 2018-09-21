@@ -9,6 +9,14 @@
 # production
 /build
 
+	src/json/Allowed.json
+	src/json/Combined.json
+	src/json/NonPCT.json
+	src/json/OfficeAction.json
+	src/json/PCT.json
+
+src/json
+
 # misc
 .DS_Store
 .env.local
