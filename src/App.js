@@ -154,6 +154,7 @@ class App extends Component {
 
   render() {
     const { lawyers, granted, grantedByYear, appliedByYear, oaTimeByYear } = this.state;
+    const color = 'white'
     console.log("grantedByYear", grantedByYear);
     const background =
       "https://patentable.com/wp-content/uploads/2016/10/ow_logo_header.png";
@@ -161,7 +162,7 @@ class App extends Component {
       {
         menuItem: "Firm Statistics",
         render: () => (
-          <Tab.Pane style={{ height: "400px" }}>
+          <Tab.Pane style={{ height: "400px", backgroundImage: "linear-gradient(to right, #fff8f2 , white)" }}>
             <FirmStats
               grantedByYear={grantedByYear}
               appliedByYear={appliedByYear}
@@ -172,7 +173,7 @@ class App extends Component {
       {
         menuItem: "Lawyer Statistics",
         render: () => (
-          <Tab.Pane style={{ height: "400px" }}>
+          <Tab.Pane style={{ height: "400px", backgroundImage: "linear-gradient(to right, #fff8f2 , white)"  }}>
             <LawyerStats lawyers={lawyers} />
           </Tab.Pane>
         )
@@ -180,7 +181,7 @@ class App extends Component {
       {
         menuItem: "Office Action Statistics",
         render:() => (
-          <Tab.Pane style={{ height: "400px" }}>
+          <Tab.Pane style={{ height: "400px", backgroundImage: "linear-gradient(to right, #fff8f2 , white)" }}>
             <OAStats
               oaTimeByYear={oaTimeByYear}
             />
@@ -196,18 +197,15 @@ class App extends Component {
         <Layout>
           <div>
             <Image src={background} size="small" />
-            <Header color="blue" size="huge" style={{ display: "inline" }}>
-              OWGM PPH Stats
-            </Header>
           </div>
 
-          <Segment>
-            <Header as="h2">Basic Stats</Header>
+          <Segment style={{backgroundImage: "linear-gradient(to right, #fff8f2 , white)"}}>
+            <Header as="h2">OWGM PPH Stats</Header>
             <p>Number of Allowed PPH Applications: {granted}</p>
             <p>Time between PPH request and first Office Action: </p>
           </Segment>
 
-          <Tab panes={panes} />
+          <Tab menu={{}} panes={panes}  />
         </Layout>
       </div>
     );
