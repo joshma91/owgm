@@ -22,6 +22,12 @@
   font-size: large;
 }
 
+.chartTitle {
+  color: slategrey;
+  float: left;
+  font-size: large 
+}
+
 .segment {
   background-image: linear-gradient(to right, #fff8f2 , white);
 }
@@ -40,7 +46,7 @@ canvas {
   background-position: 50% 50%;
   opacity: 0.48;
   display: block!important;
-  background-image: linear-gradient(aliceblue, #bcffea);
+  background-image: linear-gradient(aliceblue, #bcffea  );
 }
 
 

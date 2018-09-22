@@ -1,10 +1,9 @@
 import React, { Component } from "react";
-import { BarChart, XAxis, YAxis, Bar, Tooltip, Label } from "recharts";
-import { Segment, Header, Tab, Image, Grid } from "semantic-ui-react";
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { Segment, Header, Tab, Image, Button } from "semantic-ui-react";
 import Particles from "react-particles-js";
 import particlesConfig from "./json/particlesConfig.json";
 import Layout from "./components/Layout";
-import TabPane from "./components/TabPane";
 import FirmStats from "./components/FirmStats";
 import LawyerStats from "./components/LawyerStats";
 import OAStats from "./components/OAStats"
@@ -14,6 +13,7 @@ import NonPCT from "./json/NonPCT.json";
 import PCT from "./json/PCT.json";
 import OfficeAction from "./json/OfficeAction.json";
 import Combined from "./json/Combined.json";
+import Presentation from "./components/Presentation"
 
 class App extends Component {
   state = {
@@ -22,7 +22,8 @@ class App extends Component {
     grantedByYear: null,
     appliedByYear: null,
     firstOfficeAction: null,
-    oaTimeByYear: null
+    oaTimeByYear: null,
+    presentationView: false
   };
 
   componentDidMount = async () => {
@@ -152,8 +153,12 @@ class App extends Component {
     return byYear;
   };
 
+  toPresentation = (option) => {
+    this.setState({presentationView: option})
+  }
+
   render() {
-    const { lawyers, granted, grantedByYear, appliedByYear, oaTimeByYear } = this.state;
+    const { lawyers, granted, grantedByYear, appliedByYear, oaTimeByYear, presentationView } = this.state;
     const color = 'white'
     console.log("grantedByYear", grantedByYear);
     const background =
@@ -190,7 +195,8 @@ class App extends Component {
       }
     ];
 
-    return (
+    console.log("presentation", presentationView)
+    return presentationView ? (<Presentation slide={3} toPresentation={this.toPresentation}/>) : (
       <div className="App">
         <Particles params={particlesConfig} />
 
@@ -200,9 +206,9 @@ class App extends Component {
           </div>
 
           <Segment style={{backgroundImage: "linear-gradient(to right, #fff8f2 , white)"}}>
-            <Header as="h2">OWGM PPH Stats</Header>
+            <Header as="h2">OWGM PPH LawyerStats</Header>
             <p>Number of Allowed PPH Applications: {granted}</p>
-            <p>Time between PPH request and first Office Action: </p>
+            <Button primary onClick={() => this.toPresentation(true)}>To Presentation</Button>
           </Segment>
 
           <Tab menu={{}} panes={panes}  />

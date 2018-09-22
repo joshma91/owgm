@@ -11,7 +11,7 @@ export default class OAStats extends React.Component {
       <Grid columns={2} divided>
         <Grid.Row>
           <Grid.Column>
-            <p style={{ float: "left", fontSize: "large" }}>
+            <p class="chartTitle">
               Average Time to First Office Action
             </p>
             <BarChart
@@ -27,7 +27,7 @@ export default class OAStats extends React.Component {
             </BarChart>
           </Grid.Column>
           <Grid.Column>
-            <p style={{ float: "left", fontSize: "large" }}>
+            <p class="chartTitle">
               Applications Receiving Immediate Grant
             </p>
            
