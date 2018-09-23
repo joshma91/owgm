@@ -11,7 +11,7 @@ export default class FirmStats extends React.Component {
       <Grid columns={2} divided>
         <Grid.Row>
           <Grid.Column>
-            <p class="chartTitle">
+            <p className="chartTitle">
               Number of Granted PPH Applications
             </p>
             <BarChart
@@ -27,7 +27,7 @@ export default class FirmStats extends React.Component {
             </BarChart>
           </Grid.Column>
           <Grid.Column>
-            <p class="chartTitle">
+            <p className="chartTitle">
               Number of PPH Applications
             </p>
             <BarChart

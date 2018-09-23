@@ -6,14 +6,17 @@ import particlesConfig from "./json/particlesConfig.json";
 import Layout from "./components/Layout";
 import FirmStats from "./components/FirmStats";
 import LawyerStats from "./components/LawyerStats";
-import OAStats from "./components/OAStats"
+import OAStats from "./components/OAStats";
+import ComparativeStats from "./components/ComparativeStats";
 import "./App.css";
 import Allowed from "./json/Allowed.json";
 import NonPCT from "./json/NonPCT.json";
 import PCT from "./json/PCT.json";
 import OfficeAction from "./json/OfficeAction.json";
 import Combined from "./json/Combined.json";
-import Presentation from "./components/Presentation"
+import nonCombined from "./json/nonPPH/Combined.json";
+import nonOfficeAction from "./json/nonPPH/OfficeAction.json";
+import Presentation from "./components/Presentation";
 
 class App extends Component {
   state = {
@@ -23,7 +26,9 @@ class App extends Component {
     appliedByYear: null,
     firstOfficeAction: null,
     oaTimeByYear: null,
-    presentationView: false
+    nonOATimeByYear: null,
+    presentationView: false,
+    firstOACompare: null
   };
 
   componentDidMount = async () => {
@@ -32,12 +37,13 @@ class App extends Component {
     this.getGrantedByYear();
     this.getAppliedByYear();
     await this.getLawyerGrantsByYear();
-    await this.getFirstOfficeAction();
+    await this.nonPPHYearDiff();
+    await this.PPHYearDiff();
+    await this.comparativeFirstOA();
   };
 
   getLawyers = async () => {
     const lawyers = [...new Set(OfficeAction.map(item => item.Attorney))];
-    console.log(lawyers);
     this.setState({ lawyers });
   };
 
@@ -86,8 +92,8 @@ class App extends Component {
     this.setState({ lawyers: update });
   };
 
-  getFirstOfficeAction = async () => {
-    const firstAction = OfficeAction.filter((x, i, self) => {
+  firstOAByYearHelper = async (officeAction, combined) => {
+    const firstAction = officeAction.filter((x, i, self) => {
       return (
         self
           .map(item => {
@@ -97,45 +103,82 @@ class App extends Component {
       );
     });
 
-    // Filter only for GRANTED and PENDING statuses
+    // Filter only for GRANTED and PENDING statuses and NO DIV
     const monthsBetween = firstAction.map(x => {
-      const filed = Combined.filter(y => {
+      const filed = combined.filter(y => {
         return (
           y.CaseNumber == x.CaseNumber &&
-          (y.Status == "Pending" || y.Status == "Granted")
+          (y.Status == "Pending" || y.Status == "Granted") &&
+          y.CaseType !== "DIV"
         );
       });
 
       if (filed.length >= 1) {
         const oaDate = new Date(x.DueDate);
         const filedDate = new Date(filed[0].FilDate);
-        oaDate.setMonth(oaDate.getMonth() - 6);
+        oaDate.setMonth(oaDate.getMonth() - 7);
         const timeDiff = Math.abs(oaDate.getTime() - filedDate.getTime());
         const diffMonths = Math.ceil(timeDiff / (1000 * 3600 * 24 * 30));
         const combined = filed[0];
         combined.monthsToOA = diffMonths;
-        combined.yearFiled = filedDate.getFullYear()
+        combined.yearFiled = filedDate.getFullYear();
         return combined;
       }
     });
 
     const monthsBetweenFiltered = monthsBetween.filter(x => x !== undefined);
 
-    const diffByYear = monthsBetweenFiltered.reduce((a, { yearFiled, monthsToOA}) => {
-      a[yearFiled] = a[yearFiled] || { sum: 0, count: 0}
-      a[yearFiled].sum += monthsToOA
-      a[yearFiled].average = a[yearFiled].sum / ++a[yearFiled].count
-      return a     
-    }, {})
+    const diffByYear = monthsBetweenFiltered.reduce(
+      (a, { yearFiled, monthsToOA }) => {
+        a[yearFiled] = a[yearFiled] || { sum: 0, count: 0 };
+        a[yearFiled].sum += monthsToOA;
+        a[yearFiled].average = a[yearFiled].sum / ++a[yearFiled].count;
+        return a;
+      },
+      {}
+    );
 
-    console.log(diffByYear)
-    
     const diffByYearClean = Object.keys(diffByYear).map(x => {
-      const diff = diffByYear[x]
-      return {year: x, months: diff.average}
-    })
-    console.log(diffByYearClean)
-    this.setState({oaTimeByYear: diffByYearClean})
+      const diff = diffByYear[x];
+      return { year: x, months: diff.average };
+    });
+    return diffByYearClean;
+  };
+
+  nonPPHYearDiff = async () => {
+    const nonOATimeByYear = await this.firstOAByYearHelper(
+      nonOfficeAction,
+      nonCombined
+    );
+
+    this.setState({ nonOATimeByYear });
+    console.log("nonPPH:", nonOATimeByYear);
+  };
+
+  PPHYearDiff = async () => {
+    const oaTimeByYear = await this.firstOAByYearHelper(OfficeAction, Combined);
+    this.setState({ oaTimeByYear });
+  };
+
+  // only get years after 2008 - when PPH started
+  comparativeFirstOA = () => {
+    const { oaTimeByYear, nonOATimeByYear } = this.state;
+    const after2008 = oaTimeByYear.filter(x => parseInt(x.year) > 2008);
+
+    const pphAverage = after2008.reduce((acc, curr, i) => {
+      console.log(curr);
+      return acc + (curr.months - acc) / (i + 1);
+    }, 0);
+
+    const nonAverage = nonOATimeByYear.reduce((acc, curr, i) => {
+      return acc + (curr.months - acc) / (i + 1);
+    }, 0);
+
+    const firstOACompare = [
+      { type: "PPH", averageTime: pphAverage },
+      { type: "non-PPH", averageTime: nonAverage }
+    ];
+    this.setState({ firstOACompare });
   };
 
   totalByYear = (data, dateField) => {
@@ -153,21 +196,32 @@ class App extends Component {
     return byYear;
   };
 
-  toPresentation = (option) => {
-    this.setState({presentationView: option})
-  }
+  toPresentation = option => {
+    this.setState({ presentationView: option });
+  };
 
   render() {
-    const { lawyers, granted, grantedByYear, appliedByYear, oaTimeByYear, presentationView } = this.state;
-    const color = 'white'
-    console.log("grantedByYear", grantedByYear);
+    const {
+      lawyers,
+      granted,
+      grantedByYear,
+      appliedByYear,
+      oaTimeByYear,
+      firstOACompare,
+      presentationView
+    } = this.state;
     const background =
       "https://patentable.com/wp-content/uploads/2016/10/ow_logo_header.png";
     const panes = [
       {
         menuItem: "Firm Statistics",
         render: () => (
-          <Tab.Pane style={{ height: "400px", backgroundImage: "linear-gradient(to right, #fff8f2 , white)" }}>
+          <Tab.Pane
+            style={{
+              height: "400px",
+              backgroundImage: "linear-gradient(to right, #fff8f2 , white)"
+            }}
+          >
             <FirmStats
               grantedByYear={grantedByYear}
               appliedByYear={appliedByYear}
@@ -178,25 +232,46 @@ class App extends Component {
       {
         menuItem: "Lawyer Statistics",
         render: () => (
-          <Tab.Pane style={{ height: "400px", backgroundImage: "linear-gradient(to right, #fff8f2 , white)"  }}>
+          <Tab.Pane
+            style={{
+              height: "400px",
+              backgroundImage: "linear-gradient(to right, #fff8f2 , white)"
+            }}
+          >
             <LawyerStats lawyers={lawyers} />
           </Tab.Pane>
         )
       },
       {
         menuItem: "Office Action Statistics",
-        render:() => (
-          <Tab.Pane style={{ height: "400px", backgroundImage: "linear-gradient(to right, #fff8f2 , white)" }}>
-            <OAStats
-              oaTimeByYear={oaTimeByYear}
-            />
+        render: () => (
+          <Tab.Pane
+            style={{
+              height: "400px",
+              backgroundImage: "linear-gradient(to right, #fff8f2 , white)"
+            }}
+          >
+            <OAStats oaTimeByYear={oaTimeByYear} />
+          </Tab.Pane>
+        )
+      },
+      {
+        menuItem: "Comparative Statistics",
+        render: () => (
+          <Tab.Pane
+            style={{
+              height: "400px",
+              backgroundImage: "linear-gradient(to right, #fff8f2 , white)"
+            }}
+          >
+            <ComparativeStats firstOACompare={firstOACompare} />
           </Tab.Pane>
         )
       }
     ];
-
-    console.log("presentation", presentationView)
-    return presentationView ? (<Presentation slide={3} toPresentation={this.toPresentation}/>) : (
+    return presentationView ? (
+      <Presentation slide={3} toPresentation={this.toPresentation} />
+    ) : (
       <div className="App">
         <Particles params={particlesConfig} />
 
@@ -205,13 +280,19 @@ class App extends Component {
             <Image src={background} size="small" />
           </div>
 
-          <Segment style={{backgroundImage: "linear-gradient(to right, #fff8f2 , white)"}}>
+          <Segment
+            style={{
+              backgroundImage: "linear-gradient(to right, #fff8f2 , white)"
+            }}
+          >
             <Header as="h2">OWGM PPH LawyerStats</Header>
             <p>Number of Allowed PPH Applications: {granted}</p>
-            <Button primary onClick={() => this.toPresentation(true)}>To Presentation</Button>
+            <Button color={"twitter"} onClick={() => this.toPresentation(true)}>
+              To Presentation
+            </Button>
           </Segment>
 
-          <Tab menu={{}} panes={panes}  />
+          <Tab menu={{}} panes={panes} />
         </Layout>
       </div>
     );

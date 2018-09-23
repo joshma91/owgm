@@ -32,6 +32,14 @@
   background-image: linear-gradient(to right, #fff8f2 , white);
 }
 
+.spectacle-slide {
+  background-image: linear-gradient(aliceblue, #bcffea  );
+}
+
+.spectacle-deck {
+  background-image: linear-gradient(aliceblue, #bcffea  );
+}
+
 header {
   font-size: 62px;
   color: rgb(0, 182, 228)
