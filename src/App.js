@@ -16,6 +16,7 @@ import OfficeAction from "./json/OfficeAction.json";
 import Combined from "./json/Combined.json";
 import nonCombined from "./json/nonPPH/Combined.json";
 import nonOfficeAction from "./json/nonPPH/OfficeAction.json";
+import nonAllowed from "./json/nonPPH/Allowed.json"
 import Presentation from "./components/Presentation";
 
 class App extends Component {
@@ -28,7 +29,9 @@ class App extends Component {
     oaTimeByYear: null,
     nonOATimeByYear: null,
     presentationView: false,
-    firstOACompare: null
+    firstOACompare: null,
+    instantRate: null,
+    grantRate: null
   };
 
   componentDidMount = async () => {
@@ -40,6 +43,8 @@ class App extends Component {
     await this.nonPPHYearDiff();
     await this.PPHYearDiff();
     await this.comparativeFirstOA();
+    await this.comparativeGrantRate();
+    await this.instantGrantRate();
   };
 
   getLawyers = async () => {
@@ -113,6 +118,7 @@ class App extends Component {
         );
       });
 
+
       if (filed.length >= 1) {
         const oaDate = new Date(x.DueDate);
         const filedDate = new Date(filed[0].FilDate);
@@ -145,6 +151,41 @@ class App extends Component {
     return diffByYearClean;
   };
 
+  instantGrantHelper = (officeAction, allowed) => {
+    const officeActions = officeAction.filter((x, i, self) => {
+      return (
+        self
+          .map(item => {
+            return item.CaseNumber;
+          })
+          .indexOf(x.CaseNumber) === i && x.Country == "CA"
+      );
+    });
+
+    console.log("office Action Unique: ", officeActions)
+
+    const operation = (list1, list2, isUnion = false) =>
+    list1.filter( a => isUnion === list2.some( b => a.CaseNumber === b.CaseNumber ) );
+
+    const instant = operation(allowed, officeAction);
+
+    console.log('Instant:', instant); 
+
+    return instant.length/(instant.length + officeActions.length)
+  }
+
+  instantGrantRate = async () => {
+    const pphInstantRate = this.instantGrantHelper(OfficeAction, Allowed) 
+
+    const nonInstantRate = this.instantGrantHelper(nonOfficeAction, nonAllowed)
+
+    const instantRate = [
+      { type: "PPH", instantRate: pphInstantRate },
+      { type: "non-PPH", instantRate: nonInstantRate }
+    ];
+    this.setState({instantRate})
+  }
+
   nonPPHYearDiff = async () => {
     const nonOATimeByYear = await this.firstOAByYearHelper(
       nonOfficeAction,
@@ -163,9 +204,8 @@ class App extends Component {
   // only get years after 2008 - when PPH started
   comparativeFirstOA = () => {
     const { oaTimeByYear, nonOATimeByYear } = this.state;
-    const after2008 = oaTimeByYear.filter(x => parseInt(x.year) > 2008);
 
-    const pphAverage = after2008.reduce((acc, curr, i) => {
+    const pphAverage = oaTimeByYear.reduce((acc, curr, i) => {
       console.log(curr);
       return acc + (curr.months - acc) / (i + 1);
     }, 0);
@@ -180,6 +220,30 @@ class App extends Component {
     ];
     this.setState({ firstOACompare });
   };
+
+
+  comparativeGrantRate = async () => {
+    const nonPPHRate = this.rateHelper(nonCombined)
+    const PPHRate = this.rateHelper(Combined)
+
+    const grantRate = [
+      { type: "PPH", grantRate: PPHRate },
+      { type: "non-PPH", grantRate: nonPPHRate }
+    ];
+    this.setState({grantRate})
+  }
+
+  rateHelper = (combined) => {
+    const temp = combined.reduce((acc, curr) => {
+      if(curr.Status == "Granted") {
+        acc.grantCount++
+      } else if (curr.Status == "Abandoned") {
+        acc.abandonCount++
+      }
+      return acc;
+    },{grantCount: 0, abandonCount: 0})
+    return temp.grantCount/(temp.grantCount + temp.abandonCount)
+  }
 
   totalByYear = (data, dateField) => {
     const byYear = data.reduce((acc, curr) => {
@@ -208,6 +272,8 @@ class App extends Component {
       appliedByYear,
       oaTimeByYear,
       firstOACompare,
+      grantRate,
+      instantRate,
       presentationView
     } = this.state;
     const background =
@@ -264,7 +330,8 @@ class App extends Component {
               backgroundImage: "linear-gradient(to right, #fff8f2 , white)"
             }}
           >
-            <ComparativeStats firstOACompare={firstOACompare} />
+            <ComparativeStats firstOACompare={firstOACompare} grantRate = {grantRate} 
+            instantRate = {instantRate}/>
           </Tab.Pane>
         )
       }
@@ -285,7 +352,7 @@ class App extends Component {
               backgroundImage: "linear-gradient(to right, #fff8f2 , white)"
             }}
           >
-            <Header as="h2">OWGM PPH LawyerStats</Header>
+            <Header as="h2">OWGM PPH Analytics</Header>
             <p>Number of Allowed PPH Applications: {granted}</p>
             <Button color={"twitter"} onClick={() => this.toPresentation(true)}>
               To Presentation

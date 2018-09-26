@@ -19,3 +19,4 @@ export default class MySlide extends React.Component {
     );
   }
 }
+

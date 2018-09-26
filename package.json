@@ -4,6 +4,7 @@
   "private": true,
   "homepage": "http://joshma91.github.io/owgm",
   "dependencies": {
+    "bayes-classifier": "0.0.5",
     "react": "^16.5.0",
     "react-dom": "^16.5.0",
     "react-particles-js": "^2.3.0",

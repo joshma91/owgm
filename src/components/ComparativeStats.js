@@ -5,17 +5,16 @@ import { BarChart, XAxis, YAxis, Bar, Tooltip, Label } from "recharts";
 export default class OAStats extends React.Component {
   render() {
 
-    const {firstOACompare} = this.props
-    console.log("firstOACompare: ", firstOACompare)
+    const {firstOACompare, grantRate, instantRate} = this.props
     return (  
-      <Grid columns={2} divided>
+      <Grid columns={3} divided>
         <Grid.Row>
           <Grid.Column>
             <p className="chartTitle">
-              Average Time to First Office Action: PPH vs non-PPH
+              Average Time to First Office Action
             </p>
             <BarChart
-              width={400}
+              width={300}
               height={300}
               data={firstOACompare}
               margin={{ top: 50, right: 10, left: 10, bottom: 5 }}
@@ -27,10 +26,41 @@ export default class OAStats extends React.Component {
             </BarChart>
           </Grid.Column>
           <Grid.Column>
-            <p class="chartTitle">
-              Applications Receiving Immediate Grant
+            <p className="chartTitle">
+              Grant Rate
             </p>
-           
+            <BarChart
+              width={300}
+              height={300}
+              data={grantRate}
+              margin={{ top: 50, right: 10, left: 10, bottom: 5 }}
+            >
+              <XAxis dataKey="type" />
+              <YAxis />
+              <Tooltip />
+              <Bar
+                type="monotone"
+                dataKey="grantRate"
+                barSize={30}
+                fill="#8884d8"
+              />
+            </BarChart>
+          </Grid.Column>
+          <Grid.Column>
+            <p className="chartTitle">
+              Grant Rate Without Office Action
+            </p>
+            <BarChart
+              width={300}
+              height={300}
+              data={instantRate}
+              margin={{ top: 50, right: 10, left: 10, bottom: 5 }}
+            >
+              <XAxis dataKey="type" />
+              <YAxis />
+              <Tooltip />
+              <Bar type="monotone" dataKey="instantRate" barSize={30} fill="#8884d8" />
+            </BarChart>
           </Grid.Column>
         </Grid.Row>
       </Grid>
