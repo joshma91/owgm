@@ -5,7 +5,9 @@
   "homepage": "http://joshma91.github.io/owgm",
   "dependencies": {
     "bayes-classifier": "0.0.5",
+    "moment": "^2.22.2",
     "react": "^16.5.0",
+    "react-big-calendar": "^0.20.1",
     "react-dom": "^16.5.0",
     "react-particles-js": "^2.3.0",
     "react-router-dom": "^4.3.1",

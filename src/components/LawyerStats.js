@@ -1,6 +1,6 @@
 import React from "react";
 import { Grid, Tab } from "semantic-ui-react";
-import { BarChart, XAxis, YAxis, Bar, Tooltip, Label } from "recharts";
+import { BarChart, XAxis, YAxis, Bar, Tooltip, Label, LabelList } from "recharts";
 
 export default class LawyerStats extends React.Component {
   render() {
@@ -31,10 +31,27 @@ export default class LawyerStats extends React.Component {
               data={lawyersObj[x]}
               margin={{ top: 50, right: 10, left: 10, bottom: 5 }}
             >
-              <XAxis dataKey="year" />
-              <YAxis />
+              <XAxis dataKey="year">
+                <Label
+                  value="Year"
+                  offset={-5}
+                  position="insideBottom"
+                  style={{ fill: "slategrey" }}
+                />
+              </XAxis>
+              <YAxis>
+                <Label
+                  value="Granted"
+                  angle="-90"
+                  position="insideLeft"
+                  style={{ textAnchor: "middle", fill: "slategrey"}}
+                  offset={0}
+                />
+              </YAxis>
               <Tooltip />
-              <Bar type="monotone" dataKey="numGranted" barSize={30} fill="#8884d8" />
+              <Bar type="monotone" dataKey="numGranted" barSize={30} fill="#8884d8">
+                <LabelList dataKey="numGranted" position="top" style={{fill: "slategrey"}} />
+              </Bar>
             </BarChart>
           </Tab.Pane>
         )

@@ -8,6 +8,9 @@ import FirmStats from "./components/FirmStats";
 import LawyerStats from "./components/LawyerStats";
 import OAStats from "./components/OAStats";
 import ComparativeStats from "./components/ComparativeStats";
+import Ordinary from "./components/Ordinary"
+import ML from "./components/ML";
+import Calendar from "./components/Calendar"
 import "./App.css";
 import Allowed from "./json/Allowed.json";
 import NonPCT from "./json/NonPCT.json";
@@ -16,7 +19,10 @@ import OfficeAction from "./json/OfficeAction.json";
 import Combined from "./json/Combined.json";
 import nonCombined from "./json/nonPPH/Combined.json";
 import nonOfficeAction from "./json/nonPPH/OfficeAction.json";
-import nonAllowed from "./json/nonPPH/Allowed.json"
+import NormAllowed from "./json/nonPPH/Allowed.json"
+import NormPCT from "./json/nonPPH/PCT.json"
+import NormNonPCT from "./json/nonPPH/NonPCT.json"
+
 import Presentation from "./components/Presentation";
 
 class App extends Component {
@@ -31,20 +37,26 @@ class App extends Component {
     presentationView: false,
     firstOACompare: null,
     instantRate: null,
-    grantRate: null
+    grantRate: null,
+    ordGrantedByYear: null,
+    ordAppliedByYear: null
+
   };
 
   componentDidMount = async () => {
     await this.getLawyers();
     this.getGrantedApplications();
-    this.getGrantedByYear();
-    this.getAppliedByYear();
+    const grantedByYear = this.getGrantedByYear(Allowed);
+    const appliedByYear = this.getAppliedByYear(NonPCT, PCT);
+    const ordGrantedByYear = this.getGrantedByYear(NormAllowed)
+    const ordAppliedByYear = this.getAppliedByYear(NormNonPCT, NormPCT)
     await this.getLawyerGrantsByYear();
     await this.nonPPHYearDiff();
     await this.PPHYearDiff();
     await this.comparativeFirstOA();
     await this.comparativeGrantRate();
     await this.instantGrantRate();
+    await this.setState({grantedByYear, appliedByYear, ordGrantedByYear, ordAppliedByYear})
   };
 
   getLawyers = async () => {
@@ -58,8 +70,8 @@ class App extends Component {
     this.setState({ granted });
   };
 
-  getGrantedByYear = () => {
-    const grantedFilter = Allowed.filter(x => x.Status == "Granted");
+  getGrantedByYear = (allowed) => {
+    const grantedFilter = allowed.filter(x => x.Status == "Granted");
     const grantedByYearObj = this.totalByYear(grantedFilter, "DueDate");
 
     const grantedByYear = Object.keys(grantedByYearObj).map(year => {
@@ -67,20 +79,19 @@ class App extends Component {
       return { year, num };
     });
 
-    this.setState({ grantedByYear });
+    return grantedByYear
   };
 
-  getAppliedByYear = () => {
-    const nonPCTAppliedByYearObj = this.totalByYear(NonPCT, "FilDate");
-    const PCTAppliedByYearObj = this.totalByYear(PCT, "DateTaken");
+  getAppliedByYear = (nonPCT, pct) => {
+    const nonPCTAppliedByYearObj = this.totalByYear(nonPCT, "FilDate");
+    const PCTAppliedByYearObj = this.totalByYear(pct, "DateTaken");
 
     const appliedByYear = Object.keys(PCTAppliedByYearObj).map(year => {
       const numPCT = PCTAppliedByYearObj[year];
       const numNonPCT = nonPCTAppliedByYearObj[year];
       return { year, numPCT, numNonPCT };
     });
-
-    this.setState({ appliedByYear });
+    return appliedByYear
   };
 
   getLawyerGrantsByYear = async () => {
@@ -146,7 +157,7 @@ class App extends Component {
 
     const diffByYearClean = Object.keys(diffByYear).map(x => {
       const diff = diffByYear[x];
-      return { year: x, months: diff.average };
+      return { year: x, months: parseFloat(diff.average.toFixed(1)) };
     });
     return diffByYearClean;
   };
@@ -162,14 +173,11 @@ class App extends Component {
       );
     });
 
-    console.log("office Action Unique: ", officeActions)
-
+    //Log here for unique
     const operation = (list1, list2, isUnion = false) =>
     list1.filter( a => isUnion === list2.some( b => a.CaseNumber === b.CaseNumber ) );
 
     const instant = operation(allowed, officeAction);
-
-    console.log('Instant:', instant); 
 
     return instant.length/(instant.length + officeActions.length)
   }
@@ -177,11 +185,11 @@ class App extends Component {
   instantGrantRate = async () => {
     const pphInstantRate = this.instantGrantHelper(OfficeAction, Allowed) 
 
-    const nonInstantRate = this.instantGrantHelper(nonOfficeAction, nonAllowed)
+    const nonInstantRate = this.instantGrantHelper(nonOfficeAction, NormAllowed)
 
     const instantRate = [
-      { type: "PPH", instantRate: pphInstantRate },
-      { type: "non-PPH", instantRate: nonInstantRate }
+      { type: "PPH", instantRate: parseFloat(pphInstantRate.toFixed(3)) },
+      { type: "non-PPH", instantRate: parseFloat(nonInstantRate.toFixed(3)) }
     ];
     this.setState({instantRate})
   }
@@ -215,8 +223,8 @@ class App extends Component {
     }, 0);
 
     const firstOACompare = [
-      { type: "PPH", averageTime: pphAverage },
-      { type: "non-PPH", averageTime: nonAverage }
+      { type: "PPH", averageTime: parseFloat(pphAverage.toFixed(3)) },
+      { type: "non-PPH", averageTime: parseFloat(nonAverage.toFixed(3)) }
     ];
     this.setState({ firstOACompare });
   };
@@ -227,8 +235,8 @@ class App extends Component {
     const PPHRate = this.rateHelper(Combined)
 
     const grantRate = [
-      { type: "PPH", grantRate: PPHRate },
-      { type: "non-PPH", grantRate: nonPPHRate }
+      { type: "PPH", grantRate: parseFloat(PPHRate.toFixed(3)) },
+      { type: "non-PPH", grantRate: parseFloat(nonPPHRate.toFixed(3)) }
     ];
     this.setState({grantRate})
   }
@@ -271,10 +279,13 @@ class App extends Component {
       grantedByYear,
       appliedByYear,
       oaTimeByYear,
+      nonOATimeByYear,
       firstOACompare,
       grantRate,
       instantRate,
-      presentationView
+      presentationView,
+      ordAppliedByYear,
+      ordGrantedByYear
     } = this.state;
     const background =
       "https://patentable.com/wp-content/uploads/2016/10/ow_logo_header.png";
@@ -317,7 +328,7 @@ class App extends Component {
               backgroundImage: "linear-gradient(to right, #fff8f2 , white)"
             }}
           >
-            <OAStats oaTimeByYear={oaTimeByYear} />
+            <OAStats oaTimeByYear={oaTimeByYear} nonOATimeByYear={nonOATimeByYear} />
           </Tab.Pane>
         )
       },
@@ -332,6 +343,45 @@ class App extends Component {
           >
             <ComparativeStats firstOACompare={firstOACompare} grantRate = {grantRate} 
             instantRate = {instantRate}/>
+          </Tab.Pane>
+        )
+      },
+      {
+        menuItem: '"Data Science"',
+        render: () => (
+          <Tab.Pane
+            style={{
+              height: "400px",
+              backgroundImage: "linear-gradient(to right, #fff8f2 , white)"
+            }}
+          >
+            <ML />
+          </Tab.Pane>
+        )
+      },
+      {
+        menuItem: 'Ordinary Applications',
+        render: () => (
+          <Tab.Pane
+            style={{
+              height: "400px",
+              backgroundImage: "linear-gradient(to right, #fff8f2 , white)"
+            }}
+          >
+            <Ordinary ordAppliedByYear={ordAppliedByYear} ordGrantedByYear={ordGrantedByYear}/>
+          </Tab.Pane>
+        )
+      },
+      {
+        menuItem: 'Fun Stuff',
+        render: () => (
+          <Tab.Pane
+            style={{
+              height: "570px",
+              backgroundImage: "linear-gradient(to right, #fff8f2 , white)"
+            }}
+          >
+            <Calendar lawyers={lawyers} />
           </Tab.Pane>
         )
       }

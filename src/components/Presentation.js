@@ -49,15 +49,15 @@ export default class Presentation extends React.Component {
         <MySlide toPresentation={this.props.toPresentation}>
 
           <Heading size={1} fit caps lineHeight={1} textColor="secondary">
-            Patent Prosecution Highway - How are we doing?
+            Expedited Examinations
           </Heading>
           <Text margin="10px 0 0" textColor="tertiary" size={1} fit bold>
-            also, look at all the time Josh wasted
+            A Look At the Data
           </Text>
           <br />
           <img
             style={{ height: "200px" }}
-            src="http://comicsandmemes.com/wp-content/uploads/comment-reply-001-wait-what-koala.jpg"
+            src="https://static.vecteezy.com/system/resources/previews/000/166/746/large_2x/vector-data-center-design-illustration.jpg"
           />
         </MySlide>
         <MySlide toPresentation={this.props.toPresentation}>

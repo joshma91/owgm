@@ -10,9 +10,9 @@ import {
   LabelList
 } from "recharts";
 
-export default class FirmStats extends React.Component {
+export default class OrdinaryStats extends React.Component {
   render() {
-    const { grantedByYear, appliedByYear } = this.props;
+    const { ordGrantedByYear, ordAppliedByYear } = this.props;
 
     return (
       <Grid columns={2} divided>
@@ -22,7 +22,7 @@ export default class FirmStats extends React.Component {
             <BarChart
               width={400}
               height={300}
-              data={grantedByYear}
+              data={ordGrantedByYear}
               margin={{ top: 50, right: 10, left: 10, bottom: 5 }}
             >
               <XAxis dataKey="year">
@@ -48,7 +48,7 @@ export default class FirmStats extends React.Component {
             <BarChart
               width={400}
               height={300}
-              data={appliedByYear}
+              data={ordAppliedByYear}
               margin={{ top: 50, right: 10, left: 10, bottom: 5 }}
             >
               <XAxis dataKey="year">
