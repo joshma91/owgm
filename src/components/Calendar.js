@@ -51,7 +51,7 @@ export default class Calendar extends React.Component {
     const localizer = BigCalendar.momentLocalizer(moment);
     let panes;
     if (Boolean(eventList)) {
-      panes = lawyerNames.filter(x => x != "BRW" && x != "AMF").map(x => {
+      panes = lawyerNames.filter(x => x != "BRW" && x != "AMF" && x != "RAJ" && x != "GSO" && x != "EYX").map(x => {
         return {
           menuItem: x[0],
           render: () => (

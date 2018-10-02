@@ -66,6 +66,7 @@ export default class OAStats extends React.Component {
               Grant Rate Without Office Action
             </p>
             <BarChart
+            domain={[0, 1]}
               width={300}
               height={300}
               data={instantRate}

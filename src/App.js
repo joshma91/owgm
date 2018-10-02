@@ -17,6 +17,7 @@ import NonPCT from "./json/NonPCT.json";
 import PCT from "./json/PCT.json";
 import OfficeAction from "./json/OfficeAction.json";
 import Combined from "./json/Combined.json";
+import Instant from "./json/Instant.json"
 import nonCombined from "./json/nonPPH/Combined.json";
 import nonOfficeAction from "./json/nonPPH/OfficeAction.json";
 import NormAllowed from "./json/nonPPH/Allowed.json"
@@ -60,7 +61,7 @@ class App extends Component {
   };
 
   getLawyers = async () => {
-    const lawyers = [...new Set(OfficeAction.map(item => item.Attorney))];
+    const lawyers = [...new Set(nonOfficeAction.map(item => item.Attorney))];
     this.setState({ lawyers });
   };
 
@@ -188,8 +189,8 @@ class App extends Component {
     const nonInstantRate = this.instantGrantHelper(nonOfficeAction, NormAllowed)
 
     const instantRate = [
-      { type: "PPH", instantRate: parseFloat(pphInstantRate.toFixed(3)) },
-      { type: "non-PPH", instantRate: parseFloat(nonInstantRate.toFixed(3)) }
+      { type: "Expedited", instantRate: parseFloat(pphInstantRate.toFixed(3)) },
+      { type: "non-Expedited", instantRate: parseFloat(nonInstantRate.toFixed(3)) }
     ];
     this.setState({instantRate})
   }
@@ -201,7 +202,7 @@ class App extends Component {
     );
 
     this.setState({ nonOATimeByYear });
-    console.log("nonPPH:", nonOATimeByYear);
+    console.log("non-Expedited:", nonOATimeByYear);
   };
 
   PPHYearDiff = async () => {
@@ -223,8 +224,8 @@ class App extends Component {
     }, 0);
 
     const firstOACompare = [
-      { type: "PPH", averageTime: parseFloat(pphAverage.toFixed(3)) },
-      { type: "non-PPH", averageTime: parseFloat(nonAverage.toFixed(3)) }
+      { type: "Expedited", averageTime: parseFloat(pphAverage.toFixed(3)) },
+      { type: "non-Expedited", averageTime: parseFloat(nonAverage.toFixed(3)) }
     ];
     this.setState({ firstOACompare });
   };
@@ -235,8 +236,8 @@ class App extends Component {
     const PPHRate = this.rateHelper(Combined)
 
     const grantRate = [
-      { type: "PPH", grantRate: parseFloat(PPHRate.toFixed(3)) },
-      { type: "non-PPH", grantRate: parseFloat(nonPPHRate.toFixed(3)) }
+      { type: "Expedited", grantRate: parseFloat(PPHRate.toFixed(3)) },
+      { type: "non-Expedited", grantRate: parseFloat(nonPPHRate.toFixed(3)) }
     ];
     this.setState({grantRate})
   }
@@ -402,8 +403,7 @@ class App extends Component {
               backgroundImage: "linear-gradient(to right, #fff8f2 , white)"
             }}
           >
-            <Header as="h2">OWGM PPH Analytics</Header>
-            <p>Number of Allowed PPH Applications: {granted}</p>
+            <Header as="h2">OWGM Expedited Exam Analytics</Header>
             <Button color={"twitter"} onClick={() => this.toPresentation(true)}>
               To Presentation
             </Button>

@@ -20,7 +20,7 @@ export default class LawyerStats extends React.Component {
     }, {});
     console.log(lawyersObj);
 
-    const panes = lawyerNames.filter(x => x != "BRW" && x != "AMF").map(x => {
+    const panes = lawyerNames.filter(x => x != "BRW" && x != "AMF" && x != "RAJ" && x != "GSO" && x != "EYX").map(x => {
       return {
         menuItem: x[0],
         render: () => (
@@ -58,6 +58,6 @@ export default class LawyerStats extends React.Component {
       };
     });
 
-    return <Tab panes={panes} />;
+    return <Tab panes={panes} defaultActiveIndex={7}/>;
   }
 }

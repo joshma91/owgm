@@ -5,7 +5,7 @@ import { Slide } from "spectacle";
 export default class MySlide extends React.Component {
   render() {
     return (
-      <Slide className="slide" transition={["zoom"]}>
+      <Slide className="slide" transition={["fade"]}>
         {" "}
         <Button
           style={{ position: "absolute", top: "-100px", left: "20px" }}

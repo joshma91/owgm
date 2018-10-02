@@ -18,7 +18,7 @@ export default class OrdinaryStats extends React.Component {
       <Grid columns={2} divided>
         <Grid.Row>
           <Grid.Column>
-            <p className="chartTitle">Number of Granted PPH Applications</p>
+            <p className="chartTitle">Number of Granted Applications</p>
             <BarChart
               width={400}
               height={300}
@@ -44,7 +44,7 @@ export default class OrdinaryStats extends React.Component {
             </BarChart>
           </Grid.Column>
           <Grid.Column>
-            <p className="chartTitle">Number of PPH Applications</p>
+            <p className="chartTitle">Number of Applications</p>
             <BarChart
               width={400}
               height={300}

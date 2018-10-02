@@ -28,6 +28,10 @@
   font-size: large 
 }
 
+.css-ezcbir {
+  line-height: 50px
+}
+
 .segment {
   background-image: linear-gradient(to right, #fff8f2 , white);
 }
