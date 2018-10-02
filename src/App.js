@@ -34,6 +34,7 @@ class App extends Component {
     appliedByYear: null,
     firstOfficeAction: null,
     oaTimeByYear: null,
+    grantTime: null,
     nonOATimeByYear: null,
     presentationView: false,
     firstOACompare: null,
@@ -54,10 +55,12 @@ class App extends Component {
     await this.getLawyerGrantsByYear();
     await this.nonPPHYearDiff();
     await this.PPHYearDiff();
+    const grantTime = await this.timeToGrantByYear(Allowed, Combined)
+    console.log("grantTime: ", grantTime)
     await this.comparativeFirstOA();
     await this.comparativeGrantRate();
     await this.instantGrantRate();
-    await this.setState({grantedByYear, appliedByYear, ordGrantedByYear, ordAppliedByYear})
+    await this.setState({grantedByYear, appliedByYear, ordGrantedByYear, ordAppliedByYear, grantTime})
   };
 
   getLawyers = async () => {
@@ -108,6 +111,49 @@ class App extends Component {
     });
     this.setState({ lawyers: update });
   };
+
+  timeToGrantByYear = async (allowed, combined) => {
+    const monthsBetween = allowed.map(x => {
+      const filed = combined.filter(y => {
+        return (
+          y.CaseNumber == x.CaseNumber &&
+          y.Status == "Granted" &&
+          y.CaseType !== "DIV"
+        );
+      });
+
+
+      if (filed.length >= 1) {
+        const oaDate = new Date(x.DueDate);
+        const filedDate = new Date(filed[0].FilDate);
+        oaDate.setMonth(oaDate.getMonth() - 7);
+        const timeDiff = Math.abs(oaDate.getTime() - filedDate.getTime());
+        const diffMonths = Math.ceil(timeDiff / (1000 * 3600 * 24 * 30));
+        const combined = filed[0];
+        combined.monthsToOA = diffMonths;
+        combined.yearFiled = filedDate.getFullYear();
+        return combined;
+      }
+    });
+
+    const monthsBetweenFiltered = monthsBetween.filter(x => x !== undefined);
+
+    const diffByYear = monthsBetweenFiltered.reduce(
+      (a, { yearFiled, monthsToOA }) => {
+        a[yearFiled] = a[yearFiled] || { sum: 0, count: 0 };
+        a[yearFiled].sum += monthsToOA;
+        a[yearFiled].average = a[yearFiled].sum / ++a[yearFiled].count;
+        return a;
+      },
+      {}
+    );
+
+    const diffByYearClean = Object.keys(diffByYear).map(x => {
+      const diff = diffByYear[x];
+      return { year: x, months: parseFloat(diff.average.toFixed(1)) };
+    });
+    return diffByYearClean;
+  }
 
   firstOAByYearHelper = async (officeAction, combined) => {
     const firstAction = officeAction.filter((x, i, self) => {
@@ -202,7 +248,6 @@ class App extends Component {
     );
 
     this.setState({ nonOATimeByYear });
-    console.log("non-Expedited:", nonOATimeByYear);
   };
 
   PPHYearDiff = async () => {
@@ -215,7 +260,6 @@ class App extends Component {
     const { oaTimeByYear, nonOATimeByYear } = this.state;
 
     const pphAverage = oaTimeByYear.reduce((acc, curr, i) => {
-      console.log(curr);
       return acc + (curr.months - acc) / (i + 1);
     }, 0);
 
@@ -286,7 +330,8 @@ class App extends Component {
       instantRate,
       presentationView,
       ordAppliedByYear,
-      ordGrantedByYear
+      ordGrantedByYear,
+      grantTime
     } = this.state;
     const background =
       "https://patentable.com/wp-content/uploads/2016/10/ow_logo_header.png";
@@ -321,7 +366,7 @@ class App extends Component {
         )
       },
       {
-        menuItem: "Office Action Statistics",
+        menuItem: "CIPO Statistics",
         render: () => (
           <Tab.Pane
             style={{
@@ -329,7 +374,7 @@ class App extends Component {
               backgroundImage: "linear-gradient(to right, #fff8f2 , white)"
             }}
           >
-            <OAStats oaTimeByYear={oaTimeByYear} nonOATimeByYear={nonOATimeByYear} />
+            <OAStats oaTimeByYear={oaTimeByYear} grantTime={grantTime} nonOATimeByYear={nonOATimeByYear} />
           </Tab.Pane>
         )
       },

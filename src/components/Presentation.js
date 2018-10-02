@@ -71,11 +71,11 @@ export default class Presentation extends React.Component {
             <ListItem>
               Special Order
               <List>
-                <ListItem style={{ fontSize: "1.5rem" }}>
+                <ListItem style={{ fontSize: "2rem" }}>
                   Must assert that failure to advance the application is likely
                   to prejudice the applicant's rights
                 </ListItem>{" "}
-                <ListItem style={{ fontSize: "1.5rem" }}>
+                <ListItem style={{ fontSize: "2rem" }}>
                   First Office Action within 60 days
                 </ListItem>{" "}
               </List>
@@ -97,13 +97,13 @@ export default class Presentation extends React.Component {
             <ListItem>
               From participating patent offices
               <List>
-                <ListItem style={{ fontSize: "1.5rem" }}>
+                <ListItem style={{ fontSize: "2rem" }}>
                   Currently 29 other partner offices
                 </ListItem>
-                <ListItem style={{ fontSize: "1.5rem" }}>
+                <ListItem style={{ fontSize: "2rem" }}>
                   Includes USPTO, EPO, JPO, SIPO
                 </ListItem>
-                <ListItem style={{ fontSize: "1.5rem" }}>
+                <ListItem style={{ fontSize: "2rem" }}>
                   First examining office must have found at least one allowable
                   claim
                 </ListItem>
@@ -124,7 +124,7 @@ export default class Presentation extends React.Component {
             <ListItem>
               Time from filing to final decision:
               <List>
-                <ListItem style={{ fontSize: "1.5rem" }}>
+                <ListItem style={{ fontSize: "2rem" }}>
                   5.4 months for PPH vs 31.2 months for other applications
                 </ListItem>{" "}
               </List>
@@ -133,7 +133,7 @@ export default class Presentation extends React.Component {
             <ListItem>
               Lower # of office actions:{" "}
               <List>
-                <ListItem style={{ fontSize: "1.5rem" }}>
+                <ListItem style={{ fontSize: "2rem" }}>
                   0.9 for PPH vs 1.6 for other applications
                 </ListItem>{" "}
               </List>
@@ -164,7 +164,7 @@ export default class Presentation extends React.Component {
 
             <ListItem>
               Double patenting               <List>
-                <ListItem style={{ fontSize: "1.5rem" }}>
+                <ListItem style={{ fontSize: "2rem" }}>
                   Consider allowing examination of corresponding applications to proceed in foreign jurisdiction to understand allowable claim scope in Canada
                 </ListItem>{" "}
               </List>
@@ -246,10 +246,24 @@ export default class Presentation extends React.Component {
             CIPO Trends
           </Heading>
           <List>
-            <ListItem>Increasing speed of first office action</ListItem>
+            <ListItem>Faster time to first office action</ListItem>
+            <ListItem>Faster time to grant</ListItem>
             
           </List>
         </MySlide>
+
+        
+        <MySlide toPresentation={this.props.toPresentation}>
+          <Heading style={{ fontSize: "2em" }} textColor="tertiary">
+            Miscellaneous Discussion
+          </Heading>
+          <List>
+            <ListItem>Document similarity and treatment (machine learning)</ListItem>
+            <ListItem>Non-expedited exam trends</ListItem>
+            
+          </List>
+        </MySlide>
+
 
       <MySlide toPresentation={this.props.toPresentation}>
           <Heading size={1} fit caps lineHeight={1} textColor="secondary">

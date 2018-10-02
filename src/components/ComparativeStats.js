@@ -66,14 +66,14 @@ export default class OAStats extends React.Component {
               Grant Rate Without Office Action
             </p>
             <BarChart
-            domain={[0, 1]}
               width={300}
               height={300}
               data={instantRate}
               margin={{ top: 50, right: 10, left: 10, bottom: 5 }}
             >
               <XAxis dataKey="type" />
-              <YAxis>
+              <YAxis 
+            domain={[0, 1]}>
                 <Label
                   value="Rate"
                   angle="-90"
