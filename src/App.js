@@ -448,7 +448,7 @@ class App extends Component {
               backgroundImage: "linear-gradient(to right, #fff8f2 , white)"
             }}
           >
-            <Header as="h2">OWGM Expedited Exam Analytics</Header>
+            <Header as="h2" color="grey">OWGM Expedited Exam Analytics</Header>
             <Button color={"twitter"} onClick={() => this.toPresentation(true)}>
               To Presentation
             </Button>
