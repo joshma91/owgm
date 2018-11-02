@@ -448,13 +448,13 @@ class App extends Component {
               backgroundImage: "linear-gradient(to right, #fff8f2 , white)"
             }}
           >
-            <Header as="h2" color="grey">OWGM Expedited Exam Analytics</Header>
+            <Header as="h2" color="grey">OWGM Analytics</Header>
             <Button color={"twitter"} onClick={() => this.toPresentation(true)}>
               To Presentation
             </Button>
           </Segment>
 
-          <Tab menu={{}} panes={panes} />
+          <Tab menu={{}} panes={panes} style={{paddingTop:"25px"}}/>
         </Layout>
       </div>
     );
